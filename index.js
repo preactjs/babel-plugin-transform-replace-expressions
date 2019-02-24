@@ -8,7 +8,7 @@ module.exports = function({ types: t }, replace = {}) {
   });
 
   function sanitizedNode(node) {
-    const { comments, loc, start, end, ...rest } = node;
+    const { comments, loc, start, end, extra, ...rest } = node;
     return rest;
   }
 
@@ -54,7 +54,7 @@ module.exports = function({ types: t }, replace = {}) {
   return {
     name: "transform-replace-expressions",
     visitor: {
-      Expression(path, state) {
+      Expression(path) {
         if (replacementNodes.has(path.node)) {
           path.skip();
           return;
