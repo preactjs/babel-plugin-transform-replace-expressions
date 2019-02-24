@@ -2,26 +2,38 @@ const { parseExpression } = require("@babel/parser");
 
 module.exports = function({ types: t }, options = {}) {
   const replace = options.replace || {};
-  const replacements = Object.keys(replace).map(key => {
-    const kExpr = parseExpression(key);
-    const vExpr = parseExpression(replace[key]);
-    return { key: kExpr, value: vExpr };
+
+  const types = new Map();
+  const values = new Set();
+  Object.keys(replace).forEach(key => {
+    const kNode = parseExpression(key);
+    const vNode = parseExpression(replace[key]);
+
+    const candidates = types.get(kNode.type) || [];
+    candidates.push({ key: kNode, value: vNode });
+    types.set(kNode.type, candidates);
+
+    values.add(vNode);
   });
 
-  const replacementNodes = new Set(replacements.map(r => r.value));
   return {
     name: "transform-replace-expressions",
     visitor: {
       Expression(path) {
-        if (replacementNodes.has(path.node)) {
+        if (values.has(path.node)) {
           path.skip();
           return;
         }
 
-        for (const replacement of replacements) {
-          if (t.isNodesEquivalent(replacement.key, path.node)) {
+        const candidates = types.get(path.node.type);
+        if (!candidates) {
+          return;
+        }
+
+        for (const { key, value } of candidates) {
+          if (t.isNodesEquivalent(key, path.node)) {
             try {
-              t.validate(path.parent, path.key, replacement.value);
+              t.validate(path.parent, path.key, value);
             } catch (err) {
               if (!(err instanceof TypeError)) {
                 throw err;
@@ -30,7 +42,7 @@ module.exports = function({ types: t }, options = {}) {
               return;
             }
 
-            path.replaceWith(replacement.value);
+            path.replaceWith(value);
             return;
           }
         }
