@@ -16,9 +16,14 @@
     "@babel/core": "^7.3.3",
     "@babel/types": "^7.3.3",
     "chai": "^4.2.0",
-    "mocha": "^6.0.1"
+    "eslint": "^5.14.1",
+    "eslint-config-prettier": "^4.0.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "mocha": "^6.0.1",
+    "prettier": "^1.16.4"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "lint": "eslint --max-warnings 0 --ignore-path .gitignore ."
   }
 }
