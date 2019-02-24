@@ -18,7 +18,7 @@ const env = process.env.NODE_ENV;
 typeof Hello === "number";
 ```
 
-`.babelrc`: 
+`.babelrc`:
 
 ```json
 {
@@ -26,8 +26,10 @@ typeof Hello === "number";
     [
       "babel-plugin-transform-replace-expressions",
       {
-        "process.env.NODE_ENV": "\"production\"",
-        "typeof Hello": "42"
+        "replace": {
+          "process.env.NODE_ENV": "\"production\"",
+          "typeof Hello": "42"
+        }
       }
     ]
   ]
