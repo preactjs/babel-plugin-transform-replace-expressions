@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-replace-expressions",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Replace JavaScript expressions with other expressions",
   "main": "index.js",
   "license": "MIT",
