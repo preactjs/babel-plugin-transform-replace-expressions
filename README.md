@@ -27,7 +27,7 @@ typeof Hello === "number";
       "babel-plugin-transform-replace-expressions",
       {
         "process.env.NODE_ENV": "\"production\"",
-        "typeof Hello": "42",
+        "typeof Hello": "42"
       }
     ]
   ]
