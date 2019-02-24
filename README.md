@@ -46,8 +46,11 @@ const env = "production";
 
 ## Notes
 
- * Replacement only works for expressions - full expressions. You can't replacing *just* `env` in `process.env.NODE_ENV`, you have to replace `process.env`, which is a proper expression in Babel AST.
- * Replacement is only done when the result is valid JavaScript. For example replacing `a` with `2` in the following code:
+ * Replacements are only applied to expressions. Therefore replacing `DEBUG` with `false` in `const DEBUG = true` does nothing, but for `if (DEBUG) {}` the result is `if (false) {}`.
+ 
+ * Only *full* expressions count. You can't replace `env` in `process.env.NODE_ENV`, you have to replace `process.env`, which is a proper expression in Babel AST.
+ 
+ * A replacement is only applied when the result is valid JavaScript. For example replacing `a` with `2` in the following code:
  ```js
  a = 1;
  b = a;
