@@ -26,6 +26,7 @@ module.exports = function({ types: t }, options = {}) {
               if (!(err instanceof TypeError)) {
                 throw err;
               }
+              path.skip();
               return;
             }
 
