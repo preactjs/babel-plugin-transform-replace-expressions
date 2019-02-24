@@ -1,4 +1,4 @@
-# babel-plugin-transform-replace-expressions
+# babel-plugin-transform-replace-expressions [![CircleCI](https://circleci.com/gh/jviide/babel-plugin-transform-replace-expressions.svg?style=shield)](https://circleci.com/gh/jviide/babel-plugin-transform-replace-expressions)
 
 Replace JavaScript expressions with other expressions.
 
