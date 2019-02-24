@@ -1,6 +1,7 @@
 const { parseExpression } = require("@babel/parser");
 
-module.exports = function({ types: t }, replace = {}) {
+module.exports = function({ types: t }, options = {}) {
+  const replace = options.replace || {};
   const replacements = Object.keys(replace).map(key => {
     const kExpr = parseExpression(key);
     const vExpr = parseExpression(replace[key]);
