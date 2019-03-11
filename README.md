@@ -25,11 +25,11 @@ typeof Hello === "number";
   "plugins": [
     [
       "babel-plugin-transform-replace-expressions",
-      {
-        "replace": {
-          "process.env.NODE_ENV": "\"production\"",
-          "typeof Hello": "42"
-        }
+      {                                               // Alternative format:
+        "replace": {                                  // "replace": [
+          "process.env.NODE_ENV": "\"production\"",   //   ["process.env.NODE_ENV": "\"production\""],
+          "typeof Hello": "42"                        //   ["typeof Hello": "42"]
+        }                                             // ]
       }
     ]
   ]
