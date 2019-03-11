@@ -25,11 +25,11 @@ typeof Hello === "number";
   "plugins": [
     [
       "babel-plugin-transform-replace-expressions",
-      {                                               // Alternative format:
-        "replace": {                                  // "replace": [
-          "process.env.NODE_ENV": "\"production\"",   //   ["process.env.NODE_ENV": "\"production\""],
-          "typeof Hello": "42"                        //   ["typeof Hello": "42"]
-        }                                             // ]
+      {
+        "replace": {
+          "process.env.NODE_ENV": "\"production\"",
+          "typeof Hello": "42"
+        }
       }
     ]
   ]
@@ -42,6 +42,29 @@ Output:
 const env = "production";
 
 42 === "number";
+```
+
+## Conflict resolution
+
+A conflict happens when two replacements have the same Babel [abstract syntax tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree) representation. For example expressions `typeof A` and `typeof    A` are formatted similarly but have the same AST representation as far as this plugin is concerned. In those situations the default is to raise an error, and can be overwritten by setting the option `allowConflictingReplacements` to `true`. 
+
+You can also always give the replacements as an array of key-value pairs. When `allowConflictingReplacements` is set to `true` the _last_ conflicting replacement gets selected.
+
+```js
+{
+  "plugins": [
+    [
+      "babel-plugin-transform-replace-expressions",
+      {
+        "replace": [
+          ["typeof A", "B"],
+          ["typeof     A", "C"]
+        ],
+        "allowConflictingReplacements": true
+      }
+    ]
+  ]
+}
 ```
 
 ## Notes
