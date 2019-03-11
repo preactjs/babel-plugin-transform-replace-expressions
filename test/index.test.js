@@ -4,12 +4,16 @@ const { parse } = require("@babel/parser");
 const { expect } = require("chai");
 const plugin = require("../index.js");
 
-function compare(input, output, options = {}) {
-  const transformed = transform(input, {
+function replace(input, options = {}) {
+  return transform(input, {
     babelrc: false,
     configFile: false,
     plugins: [[plugin, options]]
   }).code;
+}
+
+function compare(input, output, options = {}) {
+  const transformed = replace(input, options);
 
   if (!t.isNodesEquivalent(parse(transformed), parse(output))) {
     expect(transformed).to.equal(output);
@@ -17,6 +21,21 @@ function compare(input, output, options = {}) {
 }
 
 describe("babel-plugin-transform-replace-expressions", () => {
+  it("accepts replacements as objects", () => {
+    compare("a + b", "1 + 2", {
+      replace: {
+        a: "1",
+        b: "2"
+      }
+    });
+  });
+
+  it("accepts replacements as an array of key-value pairs", () => {
+    compare("a + b", "1 + 2", {
+      replace: [["a", "1"], ["b", "2"]]
+    });
+  });
+
   it("replaces simple expressions", () => {
     compare("a", "true", {
       replace: {
@@ -110,22 +129,13 @@ describe("babel-plugin-transform-replace-expressions", () => {
     });
   });
 
-  it("disallows conflicting replacements by default", () => {
+  it("disallows conflicting replacements (by default)", () => {
     expect(() =>
-      transform("", {
-        babelrc: false,
-        configFile: false,
-        plugins: [
-          [
-            plugin,
-            {
-              replace: {
-                A: "B",
-                "(A)": "B"
-              }
-            }
-          ]
-        ]
+      replace("", {
+        replace: {
+          A: "B",
+          "(A)": "B"
+        }
       })
     ).throws(/Expressions .* and .* conflict/);
   });
@@ -138,5 +148,36 @@ describe("babel-plugin-transform-replace-expressions", () => {
       },
       allowConflictingReplacements: true
     });
+  });
+
+  it("uses the last matching replacement on conflict", () => {
+    compare("A", "C", {
+      replace: [["A", "B"], ["(A)", "C"]],
+      allowConflictingReplacements: true
+    });
+    compare("A", "B", {
+      replace: [["(A)", "C"], ["A", "B"]],
+      allowConflictingReplacements: true
+    });
+  });
+
+  it("requires replacements keys to be expressions", () => {
+    expect(() =>
+      replace("", {
+        replace: {
+          "const x": "a"
+        }
+      })
+    ).throws(SyntaxError);
+  });
+
+  it("requires replacements values to be expressions", () => {
+    expect(() =>
+      replace("", {
+        replace: {
+          a: "const x"
+        }
+      })
+    ).throws(SyntaxError);
   });
 });

@@ -4,34 +4,46 @@ module.exports = function({ types: t }, options = {}) {
   const replace = options.replace || {};
   const allowConflictingReplacements = !!options.allowConflictingReplacements;
 
+  function asArray(obj) {
+    if (Array.isArray(obj)) {
+      return obj;
+    }
+    return Object.keys(obj).map(key => [key, obj[key]]);
+  }
+
   const types = new Map();
-  const values = new Set();
-  Object.keys(replace).forEach(key => {
+  asArray(replace).forEach(([key, value]) => {
     const kNode = parseExpression(key);
-    const vNode = parseExpression(replace[key]);
+    const vNode = parseExpression(value);
 
     const candidates = types.get(kNode.type) || [];
     candidates.push({ key: kNode, value: vNode, originalKey: key });
     types.set(kNode.type, candidates);
 
-    values.add(vNode);
+    for (let i = 0; i < candidates.length - 1; i++) {
+      if (!t.isNodesEquivalent(candidates[i].key, kNode)) {
+        continue;
+      }
+
+      if (allowConflictingReplacements) {
+        candidates[i] = candidates.pop();
+        break;
+      }
+
+      throw new Error(
+        `Expressions ${JSON.stringify(
+          candidates[i].originalKey
+        )} and ${JSON.stringify(key)} conflict`
+      );
+    }
   });
 
-  if (!allowConflictingReplacements) {
-    for (const candidates of types.values()) {
-      for (let i = 0; i < candidates.length; i++) {
-        for (let j = i + 1; j < candidates.length; j++) {
-          if (t.isNodesEquivalent(candidates[i].key, candidates[j].key)) {
-            throw new Error(
-              `Expressions ${JSON.stringify(
-                candidates[i].originalKey
-              )} and ${JSON.stringify(candidates[j].originalKey)} conflict`
-            );
-          }
-        }
-      }
-    }
-  }
+  const values = new Set();
+  types.forEach(candidates => {
+    candidates.forEach(candidate => {
+      values.add(candidate.value);
+    });
+  });
 
   return {
     name: "transform-replace-expressions",
