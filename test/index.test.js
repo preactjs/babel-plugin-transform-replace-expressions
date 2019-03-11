@@ -109,4 +109,34 @@ describe("babel-plugin-transform-replace-expressions", () => {
       }
     });
   });
+
+  it("disallows conflicting replacements by default", () => {
+    expect(() =>
+      transform("", {
+        babelrc: false,
+        configFile: false,
+        plugins: [
+          [
+            plugin,
+            {
+              replace: {
+                A: "B",
+                "(A)": "B"
+              }
+            }
+          ]
+        ]
+      })
+    ).throws(/Expressions .* and .* conflict/);
+  });
+
+  it("allows conflicting replacements when allowConflictingReplacements is truthy", () => {
+    compare("A", "B", {
+      replace: {
+        A: "B",
+        "(A)": "B"
+      },
+      allowConflictingReplacements: true
+    });
+  });
 });

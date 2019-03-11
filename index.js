@@ -2,6 +2,7 @@ const { parseExpression } = require("@babel/parser");
 
 module.exports = function({ types: t }, options = {}) {
   const replace = options.replace || {};
+  const allowConflictingReplacements = !!options.allowConflictingReplacements;
 
   const types = new Map();
   const values = new Set();
@@ -10,11 +11,27 @@ module.exports = function({ types: t }, options = {}) {
     const vNode = parseExpression(replace[key]);
 
     const candidates = types.get(kNode.type) || [];
-    candidates.push({ key: kNode, value: vNode });
+    candidates.push({ key: kNode, value: vNode, originalKey: key });
     types.set(kNode.type, candidates);
 
     values.add(vNode);
   });
+
+  if (!allowConflictingReplacements) {
+    for (const candidates of types.values()) {
+      for (let i = 0; i < candidates.length; i++) {
+        for (let j = i + 1; j < candidates.length; j++) {
+          if (t.isNodesEquivalent(candidates[i].key, candidates[j].key)) {
+            throw new Error(
+              `Expressions ${JSON.stringify(
+                candidates[i].originalKey
+              )} and ${JSON.stringify(candidates[j].originalKey)} conflict`
+            );
+          }
+        }
+      }
+    }
+  }
 
   return {
     name: "transform-replace-expressions",
