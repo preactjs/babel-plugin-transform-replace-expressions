@@ -1,14 +1,14 @@
-const t = require("@babel/types");
-const { transform } = require("@babel/core");
-const { parse } = require("@babel/parser");
-const { expect } = require("chai");
-const plugin = require("../index.js");
+import t from "@babel/types";
+import { transform } from "@babel/core";
+import { parse } from "@babel/parser";
+import { describe, it, expect } from "vitest";
+import plugin from "../index.js";
 
 function replace(input, options = {}) {
   return transform(input, {
     babelrc: false,
     configFile: false,
-    plugins: [[plugin, options]]
+    plugins: [[plugin, options]],
   }).code;
 }
 
@@ -25,30 +25,33 @@ describe("babel-plugin-transform-replace-expressions", () => {
     compare("a + b", "1 + 2", {
       replace: {
         a: "1",
-        b: "2"
-      }
+        b: "2",
+      },
     });
   });
 
   it("accepts replacements as an array of key-value pairs", () => {
     compare("a + b", "1 + 2", {
-      replace: [["a", "1"], ["b", "2"]]
+      replace: [
+        ["a", "1"],
+        ["b", "2"],
+      ],
     });
   });
 
   it("replaces simple expressions", () => {
     compare("a", "true", {
       replace: {
-        a: "true"
-      }
+        a: "true",
+      },
     });
   });
 
   it("replaces all instances of matching expressions", () => {
     compare("a; a; a;", "true; true; true;", {
       replace: {
-        a: "true"
-      }
+        a: "true",
+      },
     });
   });
 
@@ -58,8 +61,8 @@ describe("babel-plugin-transform-replace-expressions", () => {
       'if ("production" === "production") {}',
       {
         replace: {
-          "process.env.NODE_ENV": '"production"'
-        }
+          "process.env.NODE_ENV": '"production"',
+        },
       }
     );
   });
@@ -67,16 +70,16 @@ describe("babel-plugin-transform-replace-expressions", () => {
   it("replaces partial member expressions", () => {
     compare("process.env.NODE_ENV", "({}).NODE_ENV", {
       replace: {
-        "process.env": "{}"
-      }
+        "process.env": "{}",
+      },
     });
   });
 
   it("replaces member expressions only beginning fron their root", () => {
     compare("process.env.NODE_ENV", "process.env.NODE_ENV", {
       replace: {
-        env: `{}`
-      }
+        env: `{}`,
+      },
     });
   });
 
@@ -84,14 +87,14 @@ describe("babel-plugin-transform-replace-expressions", () => {
     compare("process.env.NODE_ENV", '"production"', {
       replace: {
         "process.env.NODE_ENV": '"production"',
-        "process.env": "{}"
-      }
+        "process.env": "{}",
+      },
     });
     compare("process.env.NODE_ENV", '"production"', {
       replace: {
         "process.env": "{}",
-        "process.env.NODE_ENV": '"production"'
-      }
+        "process.env.NODE_ENV": '"production"',
+      },
     });
   });
 
@@ -99,16 +102,16 @@ describe("babel-plugin-transform-replace-expressions", () => {
     compare("x", "y", {
       replace: {
         x: "y",
-        y: "z"
-      }
+        y: "z",
+      },
     });
   });
 
   it("skips replacements where the result is not valid JavaScript", () => {
     compare("a = 2", "a = 2", {
       replace: {
-        a: "2"
-      }
+        a: "2",
+      },
     });
   });
 
@@ -116,16 +119,16 @@ describe("babel-plugin-transform-replace-expressions", () => {
     compare("a.b = 2", "a.b = 2", {
       replace: {
         a: "x",
-        "a.b": "2"
-      }
+        "a.b": "2",
+      },
     });
   });
 
   it("ignores non-expressions", () => {
     compare("const A = true; if (A) {}", "const A = true; if (B) {}", {
       replace: {
-        A: "B"
-      }
+        A: "B",
+      },
     });
   });
 
@@ -134,8 +137,8 @@ describe("babel-plugin-transform-replace-expressions", () => {
       replace("", {
         replace: {
           A: "B",
-          "(A)": "B"
-        }
+          "(A)": "B",
+        },
       })
     ).throws(/Expressions .* and .* conflict/);
   });
@@ -144,20 +147,26 @@ describe("babel-plugin-transform-replace-expressions", () => {
     compare("A", "B", {
       replace: {
         A: "B",
-        "(A)": "B"
+        "(A)": "B",
       },
-      allowConflictingReplacements: true
+      allowConflictingReplacements: true,
     });
   });
 
   it("uses the last matching replacement on conflict", () => {
     compare("A", "C", {
-      replace: [["A", "B"], ["(A)", "C"]],
-      allowConflictingReplacements: true
+      replace: [
+        ["A", "B"],
+        ["(A)", "C"],
+      ],
+      allowConflictingReplacements: true,
     });
     compare("A", "B", {
-      replace: [["(A)", "C"], ["A", "B"]],
-      allowConflictingReplacements: true
+      replace: [
+        ["(A)", "C"],
+        ["A", "B"],
+      ],
+      allowConflictingReplacements: true,
     });
   });
 
@@ -165,19 +174,19 @@ describe("babel-plugin-transform-replace-expressions", () => {
     expect(() =>
       replace("", {
         replace: {
-          "const x": "a"
-        }
+          "const x": "a",
+        },
       })
-    ).throws(SyntaxError);
+    ).throws(TypeError);
   });
 
   it("requires replacements values to be expressions", () => {
     expect(() =>
       replace("", {
         replace: {
-          a: "const x"
-        }
+          a: "const x",
+        },
       })
-    ).throws(SyntaxError);
+    ).throws(TypeError);
   });
 });
