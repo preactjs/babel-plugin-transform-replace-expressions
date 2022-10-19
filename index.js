@@ -1,6 +1,6 @@
 const { parseExpression } = require("@babel/parser");
 
-module.exports = function({ types: t }, options = {}) {
+module.exports = function ({ types: t }, options = {}) {
   const replace = options.replace || {};
   const allowConflictingReplacements = !!options.allowConflictingReplacements;
 
@@ -8,7 +8,7 @@ module.exports = function({ types: t }, options = {}) {
     if (Array.isArray(obj)) {
       return obj;
     }
-    return Object.keys(obj).map(key => [key, obj[key]]);
+    return Object.keys(obj).map((key) => [key, obj[key]]);
   }
 
   const types = new Map();
@@ -39,8 +39,8 @@ module.exports = function({ types: t }, options = {}) {
   });
 
   const values = new Set();
-  types.forEach(candidates => {
-    candidates.forEach(candidate => {
+  types.forEach((candidates) => {
+    candidates.forEach((candidate) => {
       values.add(candidate.value);
     });
   });
@@ -75,7 +75,7 @@ module.exports = function({ types: t }, options = {}) {
             return;
           }
         }
-      }
-    }
+      },
+    },
   };
 };
