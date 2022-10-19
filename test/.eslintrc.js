@@ -1,5 +1,6 @@
 module.exports = {
-  env: {
-    mocha: true
-  }
+  extends: "../.eslintrc.js",
+  parserOptions: {
+    sourceType: "module",
+  },
 };
